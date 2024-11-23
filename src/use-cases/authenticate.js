@@ -1,5 +1,5 @@
 import { InvalidCredentialsError } from "./errors/invalid-credentials-error.js";
-import { compare } from "bcryptjs";
+import { compare } from "bcrypt";
 
 export class AuthenticateUseCase {
   constructor(usersRepository) {

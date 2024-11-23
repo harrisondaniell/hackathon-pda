@@ -1,0 +1,64 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String        @id @default(uuid()) @db.VarChar(36)
+  name         String        @db.VarChar(255)
+  email        String        @unique @db.VarChar(255)
+  password     String        @db.VarChar(255)
+  companyId    String        @db.VarChar(36)
+  company      Company       @relation(fields: [companyId], references: [id])
+  reservations Reservation[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime?     @updatedAt
+}
+
+model Company {
+  id        String    @id @default(uuid()) @db.VarChar(36)
+  name      String    @db.VarChar(255)
+  email     String    @unique @db.VarChar(255)
+  password  String    @db.VarChar(255)
+  users     User[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+}
+
+model Hotel {
+  id           Int           @id @default(autoincrement())
+  name         String        @db.VarChar(255)
+  stars        Int
+  latitude     String        @db.VarChar(255)
+  longitude    String        @db.VarChar(255)
+  description  String?       @db.Text
+  address      String        @db.VarChar(255)
+  district     String?       @db.VarChar(255)
+  city         String        @db.VarChar(255)
+  state        String        @db.VarChar(255)
+  country      String        @db.VarChar(255)
+  placeId      String        @db.VarChar(255)
+  thumb        String?       @db.VarChar(255)
+  images       Json?
+  amenities    Json?
+  pois         Json?
+  reviews      Json?
+  cnpj         String?       @db.VarChar(20)
+  reservations Reservation[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime?     @updatedAt
+}
+
+model Reservation {
+  id        Int       @id @default(autoincrement())
+  userId    String    @db.VarChar(36)
+  user      User      @relation(fields: [userId], references: [id])
+  hotelId   Int
+  hotel     Hotel     @relation(fields: [hotelId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+}
