@@ -43,6 +43,7 @@ model Hotel {
   state         String         @db.VarChar(255)
   country       String         @db.VarChar(255)
   placeId       String         @db.VarChar(255)
+  password      String         @db.VarChar(255)
   thumb         String?        @db.VarChar(255)
   images        Json?
   amenities     Json?
