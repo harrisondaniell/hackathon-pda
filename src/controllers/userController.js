@@ -69,3 +69,46 @@ export async function getUsersByCompanyEmail(req, res) {
         res.status(400).json({ error: error.message });
     }
 }
+
+export async function updateUser(req, res) {
+    const { name, email, password } = req.body;
+    const updateData = {};
+
+    if (name) {
+        updateData.name = name;
+    }
+
+    if (email) {
+        updateData.email = email;
+    }
+
+    if (password) {
+        updateData.password = await bcrypt.hash(password, 10);
+    }
+
+    try {
+        const updatedUser = await prisma.user.update({
+            where: {
+                email,
+            },
+            data: updateData,
+        });
+        res.json(updatedUser);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+}
+
+export async function deleteUser(req, res) {
+    const { email } = req.params;
+    try {
+        const user = await prisma.user.delete({
+            where: {
+                email,
+            },
+        });
+        res.json(user);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+}
