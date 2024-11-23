@@ -3,9 +3,9 @@ import { registerUser, loginUser, getUserByEmail, getUsersByCompanyEmail } from 
 
 const userRouter = express.Router();
 
-userRouter.post('/register', registerUser);
-userRouter.post('/login', loginUser);
 userRouter.get('/:email', getUserByEmail);
 userRouter.get('/company/:companyEmail', getUsersByCompanyEmail);
+userRouter.post('/register', registerUser);
+userRouter.post('/login', loginUser);
 
 export default userRouter;
