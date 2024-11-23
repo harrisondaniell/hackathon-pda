@@ -13,7 +13,7 @@ model User {
   name          String         @db.VarChar(255)
   email         String         @unique @db.VarChar(255)
   password      String         @db.VarChar(255)
-  companyEmail  String         @db.VarChar(36)
+  companyEmail  String         @db.VarChar(255)
   company       Company        @relation(fields: [companyEmail], references: [email])
   reservations  Reservation[]
   createdAt     DateTime       @default(now())
