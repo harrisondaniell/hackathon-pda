@@ -1,5 +1,6 @@
 import { PrismaUsersRepository } from "../repositories/prisma/prisma.users.repository.js";
 import { AuthenticateUseCase } from "../use-cases/authenticate.js";
+import { InvalidCredentialsError } from "../use-cases/errors/invalid-credentials-error.js";
 import { z } from "zod";
 
 export async function authenticateController(req, res) {
@@ -9,7 +10,7 @@ export async function authenticateController(req, res) {
   });
 
   try {
-    const { email, password } = registerBodySchema.parse(req.body);
+    const { email, password } = req.body;
 
     const prismaUsersRepository = new PrismaUsersRepository();
     const authenticateUseCase = new AuthenticateUseCase(prismaUsersRepository);

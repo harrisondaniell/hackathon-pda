@@ -5,7 +5,7 @@ import {
   createCompany,
   updateCompany,
   deleteCompany,
-} from "../controllers/companyController.js";
+} from "../controllers/company.controller.js";
 
 const companyRouter = express.Router();
 
