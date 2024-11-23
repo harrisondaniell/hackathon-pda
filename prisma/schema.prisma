@@ -12,8 +12,8 @@ model User {
   name         String        @db.VarChar(255)
   email        String        @unique @db.VarChar(255)
   password     String        @db.VarChar(255)
-  companyId    String        @db.VarChar(36)
-  company      Company       @relation(fields: [companyId], references: [id])
+  companyEmail String        @db.VarChar(255) // Corrigido para VarChar(255) para alinhar com o campo email de Company
+  company      Company       @relation(fields: [companyEmail], references: [email])
   reservations Reservation[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime?     @updatedAt
@@ -30,7 +30,7 @@ model Company {
 }
 
 model Hotel {
-  id           Int           @id @default(autoincrement())
+  id           String        @id @default(uuid()) @db.VarChar(36) // Corrigido para String para alinhar com o tipo do id de Hotel
   name         String        @db.VarChar(255)
   stars        Int
   latitude     String        @db.VarChar(255)
@@ -55,9 +55,9 @@ model Hotel {
 
 model Reservation {
   id        Int       @id @default(autoincrement())
-  userId    String    @db.VarChar(36)
+  userId    String    @db.VarChar(36) // Corrigido para String para alinhar com o tipo de userId
   user      User      @relation(fields: [userId], references: [id])
-  hotelId   Int
+  hotelId   String    @db.VarChar(36) // Corrigido para String para alinhar com o tipo de id de Hotel
   hotel     Hotel     @relation(fields: [hotelId], references: [id])
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
