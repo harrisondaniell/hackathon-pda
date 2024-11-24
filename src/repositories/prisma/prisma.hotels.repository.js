@@ -43,8 +43,14 @@ export class PrismaHotelsRepository {
     }
   }
 
-  async findAll() {
+  async getHotels(data) {
     try {
+      if (data) {
+        const hotels = await prisma.hotel.findMany({
+          where: data,
+        });
+        return hotels;
+      }
       const hotels = await prisma.hotel.findMany();
       return hotels;
     } catch (error) {

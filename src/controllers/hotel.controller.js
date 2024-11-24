@@ -64,6 +64,30 @@ export class HotelController {
     }
   }
 
+  async getHotels(req, res) {
+    const { district, stars } = req.query;
+
+    try {
+      const filters = {};
+
+      if (district && typeof district === "string") {
+        filters.district = { contains: district, mode: "insensitive" };
+      }
+
+      const hotels = await this.hotelsRepository.getHotels(filters);
+      return res.status(200).json({
+        data: hotels,
+        count: hotels.length,
+      });
+    } catch (error) {
+      console.error("Error fetching hotels:", error);
+      return res.status(500).json({
+        error: "Internal server error",
+        message: "Unable to fetch hotels",
+      });
+    }
+  }
+
   async searchHotelsByName(req, res) {
     const { name } = req.params;
     const page = parseInt(req.query.page) || 1;
