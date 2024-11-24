@@ -1,32 +1,11 @@
-import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import z from "zod";
-import { PrismaUsersRepository } from "../repositories/prisma/prisma.users.repository.js";
-
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const passwordPattern =
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
 const userSchema = z.object({
   name: z.string().min(3).max(255),
-  email: z
-    .string()
-    .email()
-    .max(255)
-    .regex(emailPattern, "Email format is invalid"),
-  password: z
-    .string()
-    .min(8)
-    .max(255)
-    .regex(
-      passwordPattern,
-      "Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number and one special character"
-    ),
-  companyEmail: z
-    .string()
-    .email()
-    .max(255)
-    .regex(emailPattern, "Company email format is invalid"),
+  email: z.string().email().max(255),
+  password: z.string().min(6).max(255),
+  companyEmail: z.string(),
 });
 
 export class UserController {
