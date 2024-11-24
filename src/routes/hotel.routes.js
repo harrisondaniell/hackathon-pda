@@ -1,5 +1,5 @@
 import express from "express";
-import { makeHotelController } from "../factories/make-hotel-controller.js";
+import { makeHotelController } from "../factories/prisma/make-hotel-controller.js";
 import { fetchNearbyHotels } from "../controllers/nearby-hotel.controller.js";
 
 const hotelRouter = express.Router();
