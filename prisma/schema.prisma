@@ -49,6 +49,7 @@ model Hotel {
   pois         Json?
   reviews      Json?
   cnpj         String?       @db.VarChar(20)
+  category    String         @db.VarChar
   reservations Reservation[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime?     @updatedAt
