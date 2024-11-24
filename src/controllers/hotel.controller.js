@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
+import { classifyEstablishment } from "../services/classification.service.js";
 
 const prisma = new PrismaClient();
 
@@ -26,6 +27,9 @@ export async function createHotel(req, res) {
     } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
     try {
+        const { category } = await classifyEstablishment(name, description);
+
+
         const hotel = await prisma.hotel.create({
             data: {
                 name,
@@ -46,10 +50,17 @@ export async function createHotel(req, res) {
                 pois,
                 reviews,
                 cnpj,
+                category,
             },
         });
         res.json(hotel);
     } catch (error) {
+        if (error.message === "Failed to classify establishment") {
+            return res.status(502).json({
+                error: "Failed to classify the hotel. Please try again later.",
+            });
+        }
+        
         res.status(400).json({ error: error.message });
     }
 }
