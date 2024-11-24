@@ -1,4 +1,5 @@
-import { prisma } from "../../services/prisma.js"; // Certifique-se de usar a extensão `.js` nos imports
+import { prisma } from "../../services/prisma.js";
+
 export class PrismaUsersRepository {
   async findByEmail(email) {
     try {
@@ -16,7 +17,7 @@ export class PrismaUsersRepository {
 
   async create(data) {
     try {
-      const user = await prisma.create({
+      const user = await prisma.user.create({
         data,
       });
       return user;

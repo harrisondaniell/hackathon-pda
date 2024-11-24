@@ -1,19 +1,32 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
+import z from "zod";
+import { PrismaUsersRepository } from "../repositories/prisma/prisma.users.repository.js";
+import { RegisterUseCase } from "../use-cases/register.js";
 
 const prisma = new PrismaClient();
 
 export async function createUser(req, res) {
-  const { name, email, password, companyEmail } = req.body;
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const registerBodySchema = z.object({
+    name: z.string(),
+    email: z.string().email(),
+    password: z.string().min(6),
+    companyEmail: z.string(),
+  });
+
+  const { name, email, password, companyEmail } = registerBodySchema.parse(
+    req.body
+  );
+
   try {
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        companyEmail,
-      },
+    const prismaUsersRepository = new PrismaUsersRepository();
+    const registerUseCase = new RegisterUseCase(prismaUsersRepository);
+
+    const user = await registerUseCase.execute({
+      name,
+      email,
+      password,
+      companyEmail,
     });
     res.json(user);
   } catch (error) {
@@ -22,7 +35,9 @@ export async function createUser(req, res) {
 }
 
 export async function getUserByEmail(req, res) {
-  const { email } = req.params;
+  const prismaUsersRepository = new PrismaUsersRepository();
+  const user = await prismaUsersRepository.findByEmail(req.params.email);
+
   try {
     res.json(user);
   } catch (error) {

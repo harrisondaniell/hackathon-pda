@@ -3,7 +3,7 @@ import { env } from "../env/index.js";
 import { PrismaUsersRepository } from "../repositories/prisma/prisma.users.repository.js";
 import { cookieConfig } from "../config/cookie.config.js";
 
-export async function refresh(req, res, next) {
+export async function refresh(req, res) {
   try {
     const refreshToken = req.cookies.refreshToken;
 

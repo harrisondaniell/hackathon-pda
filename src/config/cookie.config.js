@@ -1,15 +1,17 @@
+import { env } from "./../env/index.js";
+
 export const cookieConfig = {
   default: {
     path: "/",
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: env.NODE_ENV === "production",
     sameSite: "strict",
   },
 
   refreshToken: {
     path: "/",
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: env.NODE_ENV === "production",
     sameSite: "strict",
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 dias
   },
@@ -17,7 +19,7 @@ export const cookieConfig = {
   logout: {
     path: "/",
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: env.NODE_ENV === "production",
     sameSite: "strict",
     expires: new Date(0),
   },
