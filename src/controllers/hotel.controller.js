@@ -29,7 +29,6 @@ export async function createHotel(req, res) {
     try {
         const { category } = await classifyEstablishment(name, description);
 
-
         const hotel = await prisma.hotel.create({
             data: {
                 name,
@@ -60,7 +59,7 @@ export async function createHotel(req, res) {
                 error: "Failed to classify the hotel. Please try again later.",
             });
         }
-        
+
         res.status(400).json({ error: error.message });
     }
 }
@@ -74,11 +73,11 @@ export async function loginHotel(req, res) {
             },
         });
         if (!hotel) {
-            throw new Error("Hotel not found");
+            throw new Error("Hotel não encontrado");
         }
         const isPasswordValid = await bcrypt.compare(password, hotel.password);
         if (!isPasswordValid) {
-            throw new Error("Invalid password");
+            throw new Error("Senha incorreta.");
         }
         res.json(hotel);
     } catch (error) {
@@ -96,7 +95,11 @@ export async function getHotelByPlaceId(req, res) {
         });
         res.json(hotel);
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        if (error.code === "P2025") {
+            res.status(404).json({ error: "Hotel não encontrado." });
+        } else {
+            res.status(400).json({ error: error.message });
+        }
     }
 }
 
@@ -113,7 +116,11 @@ export async function searchHotelsByName(req, res) {
         });
         res.json(hotels);
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        if (error.code === "P2025") {
+            res.status(404).json({ error: "Hotel não encontrado." });
+        } else {
+            res.status(400).json({ error: error.message });
+        }
     }
 }
 
@@ -205,7 +212,7 @@ export async function updateHotel(req, res) {
         });
         res.json(hotel);
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(400).json({ error: "Erro ao atualizar dados." });
     }
 }
 
@@ -219,6 +226,10 @@ export async function deleteHotel(req, res) {
         });
         res.json(hotel);
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        if (error.code === "P2025") {
+            res.status(404).json({ error: "Hotel não encontrado." });
+        } else {
+            res.status(400).json({ error: error.message });
+        }
     }
 }

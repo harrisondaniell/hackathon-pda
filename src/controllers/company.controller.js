@@ -120,7 +120,7 @@ export async function updateCompany(req, res) {
         res.json(company);
     } catch (error) {
         if (error.code === "P2025") {
-            res.status(404).json({ error: "Usuário não encontrado" });
+            res.status(404).json({ error: "Empresa não encontrada" });
         } else {
             res.status(400).json({ error: error.message });
         }
@@ -138,7 +138,7 @@ export async function deleteCompany(req, res) {
         res.json(company);
     } catch (error) {
         if (error.code === "P2025") {
-            res.status(404).json({ error: "Usuário não encontrado" });
+            res.status(404).json({ error: "Empresa não encontrada" });
         } else {
             res.status(400).json({ error: error.message });
         }
