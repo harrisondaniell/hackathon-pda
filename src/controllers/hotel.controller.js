@@ -50,6 +50,7 @@ export async function createHotel(req, res) {
                 reviews,
                 cnpj,
                 category,
+                chain,
             },
         });
         res.json(hotel);
@@ -144,6 +145,8 @@ export async function updateHotel(req, res) {
         pois,
         reviews,
         cnpj,
+        category,
+        chain,
     } = req.body;
     const updateData = {};
 
@@ -201,6 +204,12 @@ export async function updateHotel(req, res) {
     }
     if (cnpj) {
         updateData.cnpj = cnpj;
+    }
+    if (category) {
+        updateData.category = category;
+    }
+    if (chain) {
+        updateData.category = category
     }
 
     try {
