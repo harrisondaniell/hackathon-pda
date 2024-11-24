@@ -1,28 +1,40 @@
 import express from "express";
-import {
-  createUser,
-  getUserByEmail,
-  getUsersByCompanyEmail,
-  updateUser,
-  deleteUser,
-} from "../controllers/user.controller.js";
-import { authenticateController } from "../controllers/authenticate.controller.js";
-import { profile } from "../middlewares/profile.js";
+import { PrismaUsersRepository } from "../repositories/prisma/prisma.users.repository.js";
+import { UserController } from "../controllers/user.controller.js";
+import { makeAuthController } from "../factories/make-auth-controller.js";
 import { verifyJWT } from "../middlewares/verify-jwt.js";
-import { refresh } from "../controllers/refresh.js";
 
 const userRouter = express.Router();
 
-userRouter.post("/register", createUser);
-userRouter.post("/login", authenticateController);
-userRouter.post("/sessions", authenticateController);
-userRouter.get("/me", verifyJWT, profile);
+const usersRepository = new PrismaUsersRepository();
 
-userRouter.patch("/token/refresh", refresh);
+const userController = new UserController(usersRepository);
+const authController = makeAuthController();
 
-userRouter.get("/company/:companyEmail", getUsersByCompanyEmail);
-userRouter.get("/:email", getUserByEmail);
-userRouter.patch("/update", updateUser);
-userRouter.delete("/delete/:email", deleteUser);
+userRouter.post("/register", (req, res) => userController.createUser(req, res));
+userRouter.post("/login", (req, res) => authController.authenticate(req, res));
+userRouter.post("/sessions", (req, res) =>
+  authController.authenticate(req, res)
+);
+userRouter.get("/me", verifyJWT, (req, res) =>
+  authController.profile(req, res)
+);
+userRouter.patch("/token/refresh", (req, res) =>
+  authController.refresh(req, res)
+);
+
+userRouter.get("/company/:companyEmail", (req, res) =>
+  userController.getUsersByCompanyEmail(req, res)
+);
+
+userRouter.get("/:email", (req, res) =>
+  userController.getUserByEmail(req, res)
+);
+
+userRouter.patch("/update", (req, res) => userController.updateUser(req, res));
+
+userRouter.delete("/delete/:email", (req, res) =>
+  userController.deleteUser(req, res)
+);
 
 export default userRouter;

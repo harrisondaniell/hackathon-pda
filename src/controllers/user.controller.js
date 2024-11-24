@@ -2,133 +2,115 @@ import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import z from "zod";
 import { PrismaUsersRepository } from "../repositories/prisma/prisma.users.repository.js";
-import { RegisterUseCase } from "../use-cases/register.js";
-const prisma = new PrismaClient();
 
-export async function createUser(req, res) {
-  const registerBodySchema = z.object({
-    name: z.string().min(3).max(255),
-    email: z.string().email().max(255),
-    password: z.string().min(8).max(255),
-    companyEmail: z.string().email().max(255),
-  });
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const passwordPattern =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
-  try {
-    const { name, email, password, companyEmail } = registerBodySchema.parse(
-      req.body
-    );
-    const hashedPassword = await bcrypt.hash(password, 10);
+const userSchema = z.object({
+  name: z.string().min(3).max(255),
+  email: z
+    .string()
+    .email()
+    .max(255)
+    .regex(emailPattern, "Email format is invalid"),
+  password: z
+    .string()
+    .min(8)
+    .max(255)
+    .regex(
+      passwordPattern,
+      "Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number and one special character"
+    ),
+  companyEmail: z
+    .string()
+    .email()
+    .max(255)
+    .regex(emailPattern, "Company email format is invalid"),
+});
 
-    const prismaUsersRepository = new PrismaUsersRepository();
-    const registerUseCase = new RegisterUseCase(prismaUsersRepository);
-
-    const user = await registerUseCase.execute({
-      name,
-      email,
-      password: hashedPassword,
-      companyEmail,
-    });
-
-    res.json(user);
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: error.errors });
-    }
-    res.status(400).json({ error: error.message });
+export class UserController {
+  constructor(usersRepository) {
+    this.usersRepository = usersRepository;
   }
-}
 
-export async function getUserByEmail(req, res) {
-  try {
-    const prismaUsersRepository = new PrismaUsersRepository();
-    const user = await prismaUsersRepository.findByEmail(req.params.email);
+  async createUser(req, res) {
+    try {
+      const userData = userSchema.parse(req.body);
+      const hashedPassword = await bcrypt.hash(userData.password, 10);
 
-    if (!user) {
-      return res.status(404).json({ error: "Usuário não encontrado" });
-    }
+      const user = await this.usersRepository.create({
+        ...userData,
+        password: hashedPassword,
+      });
 
-    res.json(user);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-}
-
-export async function getUsersByCompanyEmail(req, res) {
-  const { companyEmail } = req.params;
-  try {
-    const users = await prisma.user.findMany({
-      where: {
-        companyEmail,
-      },
-    });
-    res.json(users);
-  } catch (error) {
-    res.status(400).json({ error: "Usuários não encontrados" });
-  }
-}
-
-export async function updateUser(req, res) {
-  const { name, email, password } = req.body;
-  const updateData = {};
-
-  try {
-    if (name) {
-      if (!name || name.length > 255 || name.length < 3)
-        throw new Error("O nome é inválido.");
-      updateData.name = name;
-    }
-
-    if (email) {
-      if (
-        !email ||
-        email.length > 255 ||
-        email.length < 3 ||
-        !emailPattern.test(email)
-      )
-        throw new Error("O Email é inválido.");
-      updateData.email = email;
-    }
-
-    if (password) {
-      if (
-        !password ||
-        password.length > 255 ||
-        password.length < 8 ||
-        !passwordPattern.test(password)
-      )
-        throw new Error("A senha é inválida.");
-      updateData.password = await bcrypt.hash(password, 10);
-    }
-
-    const updatedUser = await prisma.user.update({
-      where: {
-        email,
-      },
-      data: updateData,
-    });
-    res.json(updatedUser);
-  } catch (error) {
-    if (error.code === "P2025") {
-      res.status(404).json({ error: "Usuário não encontrado" });
-    } else {
+      res.json(user);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
       res.status(400).json({ error: error.message });
     }
   }
-}
 
-export async function deleteUser(req, res) {
-  const { email } = req.params;
-  try {
-    const user = await prisma.user.delete({
-      where: {
-        email,
-      },
-    });
-    res.json(user);
-  } catch (error) {
-    if (error.code === "P2025") {
-      res.status(404).json({ error: "Usuário não encontrado" });
-    } else {
+  async getUserByEmail(req, res) {
+    try {
+      const user = await this.usersRepository.findByEmail(req.params.email);
+
+      if (!user) {
+        return res.status(404).json({ error: "Usuário não encontrado" });
+      }
+
+      res.json(user);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  async getUsersByCompanyEmail(req, res) {
+    try {
+      const users = await this.usersRepository.findManyByCompanyEmail(
+        req.params.companyEmail
+      );
+      res.json(users);
+    } catch (error) {
+      res.status(400).json({ error: "Usuários não encontrados" });
+    }
+  }
+
+  async updateUser(req, res) {
+    try {
+      const updateSchema = userSchema.partial();
+      const updateData = updateSchema.parse(req.body);
+
+      if (updateData.password) {
+        updateData.password = await bcrypt.hash(updateData.password, 10);
+      }
+
+      const updatedUser = await this.usersRepository.update(
+        req.params.email,
+        updateData
+      );
+      res.json(updatedUser);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      if (error.code === "P2025") {
+        return res.status(404).json({ error: "Usuário não encontrado" });
+      }
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  async deleteUser(req, res) {
+    try {
+      const user = await this.usersRepository.delete(req.params.email);
+      res.json(user);
+    } catch (error) {
+      if (error.code === "P2025") {
+        return res.status(404).json({ error: "Usuário não encontrado" });
+      }
       res.status(400).json({ error: error.message });
     }
   }
