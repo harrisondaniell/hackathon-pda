@@ -1,8 +1,10 @@
 import app from "./app.js";
-import "dotenv/config";
+import { env } from "./env/index.js";
 
-const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
+const PORT = env.PORT ? Number(env.PORT) : 3000;
 
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(
+    `Server running on http://localhost:${PORT} ${process.env.JWT_SECRET}`
+  );
 });
