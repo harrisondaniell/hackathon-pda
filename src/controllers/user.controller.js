@@ -21,27 +21,6 @@ export async function createUser(req, res) {
   }
 }
 
-export async function loginUser(req, res) {
-  const { email, password } = req.body;
-  try {
-    const user = await prisma.user.findUnique({
-      where: {
-        email,
-      },
-    });
-    if (!user) {
-      throw new Error("User not found");
-    }
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      throw new Error("Invalid password");
-    }
-    res.json(user);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-}
-
 export async function getUserByEmail(req, res) {
   const { email } = req.params;
   try {

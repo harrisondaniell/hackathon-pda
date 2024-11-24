@@ -25,4 +25,15 @@ export class PrismaUsersRepository {
       throw new Error("Could not create user");
     }
   }
+
+  async findById(id) {
+    try {
+      const user = await prisma.user.findUnique({
+        where: {
+          id,
+        },
+      });
+      return user;
+    } catch (error) {}
+  }
 }
