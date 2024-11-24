@@ -2,8 +2,8 @@ import express from "express";
 import { PrismaUsersRepository } from "../repositories/prisma/prisma.users.repository.js";
 import { UserController } from "../controllers/user.controller.js";
 import { makeAuthController } from "../factories/make-auth-controller.js";
-import { verifyJWT } from "../middlewares/verify-jwt.js";
-import { refresh } from "../controllers/refresh.js";
+import { verifyJWT } from "../middlewares/verify-jwt.middleware.js";
+import { refresh } from "../services/refresh.service.js";
 
 const userRouter = express.Router();
 

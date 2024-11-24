@@ -1,244 +1,123 @@
-import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import { classifyEstablishment } from "../services/classification.service.js";
 
-const prisma = new PrismaClient();
+export class HotelController {
+  constructor(hotelsRepository) {
+    this.hotelsRepository = hotelsRepository;
+  }
 
-export async function createHotel(req, res) {
-    const {
-        name,
-        stars,
-        latitude,
-        longitude,
-        description,
-        address,
-        district,
-        city,
-        state,
-        country,
-        placeId,
-        password,
-        thumb,
-        images,
-        amenities,
-        pois,
-        reviews,
-        cnpj,
-    } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10);
+  async createHotel(req, res) {
+    const data = req.body;
+
     try {
-        const { category } = await classifyEstablishment(name, description);
+      data.password = await bcrypt.hash(password, 10);
+      data.category = await classifyEstablishment(data.name, data.description);
 
-        const hotel = await prisma.hotel.create({
-            data: {
-                name,
-                stars,
-                latitude,
-                longitude,
-                description,
-                address,
-                district,
-                city,
-                state,
-                country,
-                placeId,
-                password: hashedPassword,
-                thumb,
-                images,
-                amenities,
-                pois,
-                reviews,
-                cnpj,
-                category,
-                chain,
-            },
-        });
-        res.json(hotel);
+      const hotel = await this.hotelsRepository.create(data);
+
+      return res.status(201).json(hotel);
     } catch (error) {
-        if (error.message === "Failed to classify establishment") {
-            return res.status(502).json({
-                error: "Failed to classify the hotel. Please try again later.",
-            });
-        }
-
-        res.status(400).json({ error: error.message });
+      if (error.message === "Failed to classify establishment") {
+        return res.status(502).json({
+          error: "Failed to classify the hotel. Please try again later.",
+        });
+      }
+      return res.status(400).json({ error: error.message });
     }
-}
+  }
 
-export async function loginHotel(req, res) {
+  async loginHotel(req, res) {
     const { placeId, password } = req.body;
-    try {
-        const hotel = await prisma.hotel.findUnique({
-            where: {
-                placeId,
-            },
-        });
-        if (!hotel) {
-            throw new Error("Hotel não encontrado");
-        }
-        const isPasswordValid = await bcrypt.compare(password, hotel.password);
-        if (!isPasswordValid) {
-            throw new Error("Senha incorreta.");
-        }
-        res.json(hotel);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-}
 
-export async function getHotelByPlaceId(req, res) {
+    try {
+      const hotel = await this.hotelsRepository.findByPlaceId(placeId);
+
+      if (!hotel) {
+        return res.status(404).json({ error: "Hotel não encontrado" });
+      }
+
+      const isPasswordValid = await bcrypt.compare(password, hotel.password);
+
+      if (!isPasswordValid) {
+        return res.status(401).json({ error: "Senha incorreta." });
+      }
+
+      return res.json(hotel);
+    } catch (error) {
+      return res.status(400).json({ error: error.message });
+    }
+  }
+
+  async getHotelByPlaceId(req, res) {
     const { placeId } = req.params;
-    try {
-        const hotel = await prisma.hotel.findUnique({
-            where: {
-                placeId,
-            },
-        });
-        res.json(hotel);
-    } catch (error) {
-        if (error.code === "P2025") {
-            res.status(404).json({ error: "Hotel não encontrado." });
-        } else {
-            res.status(400).json({ error: error.message });
-        }
-    }
-}
 
-export async function searchHotelsByName(req, res) {
+    try {
+      const hotel = await this.hotelsRepository.findByPlaceId(placeId);
+
+      if (!hotel) {
+        return res.status(404).json({ error: "Hotel não encontrado." });
+      }
+
+      return res.json(hotel);
+    } catch (error) {
+      return res.status(400).json({ error: error.message });
+    }
+  }
+
+  async searchHotelsByName(req, res) {
     const { name } = req.params;
+    const page = parseInt(req.query.page) || 1;
+
     try {
-        const hotels = await prisma.hotel.findMany({
-            where: {
-                name: {
-                    contains: name,
-                    mode: "insensitive",
-                },
-            },
-        });
-        res.json(hotels);
+      const hotels = await this.hotelsRepository.searchByName(name, page);
+
+      if (!hotels || hotels.length === 0) {
+        return res.status(404).json({ error: "Nenhum hotel encontrado." });
+      }
+
+      return res.json(hotels);
     } catch (error) {
-        if (error.code === "P2025") {
-            res.status(404).json({ error: "Hotel não encontrado." });
-        } else {
-            res.status(400).json({ error: error.message });
-        }
+      return res.status(400).json({ error: error.message });
     }
-}
+  }
 
-export async function updateHotel(req, res) {
-    const {
-        name,
-        stars,
-        latitude,
-        longitude,
-        description,
-        address,
-        district,
-        city,
-        state,
-        country,
-        placeId,
-        password,
-        thumb,
-        images,
-        amenities,
-        pois,
-        reviews,
-        cnpj,
-        category,
-        chain,
-    } = req.body;
-    const updateData = {};
+  async updateHotel(req, res) {
+    const updateData = req.body;
 
-    if (name) {
-        updateData.name = name;
-    }
-    if (stars) {
-        updateData.stars = stars;
-    }
-    if (latitude) {
-        updateData.latitude = latitude;
-    }
-    if (longitude) {
-        updateData.longitude = longitude;
-    }
-    if (description) {
-        updateData.description = description;
-    }
-    if (address) {
-        updateData.address = address;
-    }
-    if (district) {
-        updateData.district = district;
-    }
-    if (city) {
-        updateData.city = city;
-    }
-    if (state) {
-        updateData.state = state;
-    }
-    if (country) {
-        updateData.country = country;
-    }
-    if (placeId) {
-        updateData.placeId = placeId;
-    }
-    if (password) {
-        const hashedPassword = await bcrypt.hash(password, 10);
-        updateData.password = hashedPassword;
-    }
-    if (thumb) {
-        updateData.thumb = thumb;
-    }
-    if (images) {
-        updateData.images = images;
-    }
-    if (amenities) {
-        updateData.amenities = amenities;
-    }
-    if (pois) {
-        updateData.pois = pois;
-    }
-    if (reviews) {
-        updateData.reviews = reviews;
-    }
-    if (cnpj) {
-        updateData.cnpj = cnpj;
-    }
-    if (category) {
-        updateData.category = category;
-    }
-    if (chain) {
-        updateData.category = category
+    if (updateData.password) {
+      updateData.password = await bcrypt.hash(updateData.password, 10);
     }
 
     try {
-        const hotel = await prisma.hotel.update({
-            where: {
-                placeId,
-            },
-            data: updateData,
-        });
-        res.json(hotel);
-    } catch (error) {
-        res.status(400).json({ error: "Erro ao atualizar dados." });
-    }
-}
+      const placeId = updateData.placeId;
+      const hotel = await this.hotelsRepository.update(placeId, updateData);
 
-export async function deleteHotel(req, res) {
+      if (!hotel) {
+        return res.status(404).json({ error: "Hotel não encontrado." });
+      }
+
+      return res.json(hotel);
+    } catch (error) {
+      return res.status(400).json({ error: "Erro ao atualizar dados." });
+    }
+  }
+
+  async deleteHotel(req, res) {
     const { placeId } = req.params;
+
     try {
-        const hotel = await prisma.hotel.delete({
-            where: {
-                placeId,
-            },
-        });
-        res.json(hotel);
+      const hotel = await this.hotelsRepository.delete(placeId);
+
+      if (!hotel) {
+        return res.status(404).json({ error: "Hotel não encontrado." });
+      }
+
+      return res.json(hotel);
     } catch (error) {
-        if (error.code === "P2025") {
-            res.status(404).json({ error: "Hotel não encontrado." });
-        } else {
-            res.status(400).json({ error: error.message });
-        }
+      if (error.code === "P2025") {
+        return res.status(404).json({ error: "Hotel não encontrado." });
+      }
+      return res.status(400).json({ error: error.message });
     }
+  }
 }

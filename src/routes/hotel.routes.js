@@ -1,20 +1,22 @@
 import express from "express";
-import {
-  createHotel,
-  loginHotel,
-  getHotelByPlaceId,
-  searchHotelsByName,
-  updateHotel,
-  deleteHotel,
-} from "../controllers/hotel.controller.js";
+import { makeHotelController } from "../factories/make-hotel-controller.js";
+import { fetchNearbyHotels } from "../controllers/nearby-hotel.controller.js";
 
 const hotelRouter = express.Router();
+const hotelController = makeHotelController();
 
-hotelRouter.get("/search/:name", searchHotelsByName);
-hotelRouter.get("/place/:placeId", getHotelByPlaceId);
-hotelRouter.post("/", createHotel);
-hotelRouter.post("/login", loginHotel);
-hotelRouter.patch("/:placeId", updateHotel);
-hotelRouter.delete("/:placeId", deleteHotel);
+hotelRouter.post("/", hotelController.createHotel);
+
+hotelRouter.post("/login", hotelController.loginHotel);
+
+hotelRouter.get("/nearby", fetchNearbyHotels);
+
+hotelRouter.patch("/:placeId", hotelController.updateHotel);
+
+hotelRouter.delete("/:placeId", hotelController.deleteHotel);
+
+hotelRouter.get("/search/:name", hotelController.searchHotelsByName);
+
+hotelRouter.get("/place/:placeId", hotelController.getHotelByPlaceId);
 
 export default hotelRouter;
