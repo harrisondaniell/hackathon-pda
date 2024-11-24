@@ -49,6 +49,7 @@ model Hotel {
   pois         Json?
   reviews      Json?
   cnpj         String?       @db.VarChar(20)
+  category    String         @db.VarChar
   reservations Reservation[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime?     @updatedAt
@@ -58,7 +59,7 @@ model Reservation {
   id        Int       @id @default(autoincrement())
   userId    String    @db.VarChar(36)
   user      User      @relation(fields: [userId], references: [id])
-  hotelId   String    @db.VarChar(36) // Corrigido para String
+  hotelId   String    @db.VarChar(36)
   hotel     Hotel     @relation(fields: [hotelId], references: [id])
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
