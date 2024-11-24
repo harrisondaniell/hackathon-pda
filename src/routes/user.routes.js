@@ -3,6 +3,7 @@ import { PrismaUsersRepository } from "../repositories/prisma/prisma.users.repos
 import { UserController } from "../controllers/user.controller.js";
 import { makeAuthController } from "../factories/make-auth-controller.js";
 import { verifyJWT } from "../middlewares/verify-jwt.js";
+import { refresh } from "../controllers/refresh.js";
 
 const userRouter = express.Router();
 
@@ -19,19 +20,16 @@ userRouter.post("/sessions", (req, res) =>
 userRouter.get("/me", verifyJWT, (req, res) =>
   authController.profile(req, res)
 );
-userRouter.patch("/token/refresh", (req, res) =>
-  authController.refresh(req, res)
-);
-
-userRouter.get("/company/:companyEmail", (req, res) =>
-  userController.getUsersByCompanyEmail(req, res)
-);
+userRouter.patch("/token/refresh", refresh);
+userRouter.patch("/update", (req, res) => userController.updateUser(req, res));
 
 userRouter.get("/:email", (req, res) =>
   userController.getUserByEmail(req, res)
 );
 
-userRouter.patch("/update", (req, res) => userController.updateUser(req, res));
+userRouter.get("/company/:companyEmail", (req, res) =>
+  userController.getUsersByCompanyEmail(req, res)
+);
 
 userRouter.delete("/delete/:email", (req, res) =>
   userController.deleteUser(req, res)

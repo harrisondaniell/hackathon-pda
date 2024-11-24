@@ -38,6 +38,7 @@ app.use(
 );
 
 app.use((err, req, res, next) => {
+  console.log(req.cookies);
   if (err.name === "UnauthorizedError") {
     console.log("Erro de autorização:", err);
     return res.status(401).json({
