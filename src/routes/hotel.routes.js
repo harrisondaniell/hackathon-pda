@@ -5,7 +5,7 @@ import { fetchNearbyHotels } from "../controllers/nearby-hotel.controller.js";
 const hotelRouter = express.Router();
 const hotelController = makeHotelController();
 
-hotelRouter.post("/", hotelController.createHotel);
+hotelRouter.post("/register", hotelController.createHotel);
 
 hotelRouter.post("/login", hotelController.loginHotel);
 

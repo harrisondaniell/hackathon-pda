@@ -10,6 +10,8 @@ export const expressConfigjwt = expressjwt({
     "/user/login",
     "/user/register",
     "/user/token/refresh",
+    "/hotel/register",
+    "/hotel/login",
 
     { url: /^\/public\/.*/, methods: ["GET"] },
   ],
