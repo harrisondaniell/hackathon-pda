@@ -60,6 +60,7 @@ export class PrismaHotelsRepository {
   }
 
   async create(data) {
+    console.log(data, "novamente");
     try {
       const hotel = await prisma.hotel.create({
         data,

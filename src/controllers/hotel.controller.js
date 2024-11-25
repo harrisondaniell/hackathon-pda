@@ -8,9 +8,10 @@ export class HotelController {
 
   async createHotel(req, res) {
     const data = req.body;
+    console.log(data);
 
     try {
-      data.password = await bcrypt.hash(password, 10);
+      data.password = await bcrypt.hash(data.password, 10);
       data.category = await classifyEstablishment(data.name, data.description);
 
       const hotel = await this.hotelsRepository.create(data);
