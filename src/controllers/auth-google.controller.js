@@ -2,6 +2,8 @@ import {
   generateGoogleAuthUrl,
   getGoogleUserInfo,
 } from "../config/googleOauth.js";
+import { env } from "../env/index.js";
+import { prisma } from "../services/prisma.service.js";
 
 export const googleAuthRedirect = (req, res) => {
   const url = generateGoogleAuthUrl();
@@ -19,7 +21,22 @@ export const googleAuthCallback = async (req, res) => {
       picture: userInfo.picture,
     };
 
-    res.redirect("/perfil");
+    const { email, password } = await prisma.user.findUnique({
+      where: {
+        email: userInfo.email,
+      },
+    });
+
+    if (!user) {
+      throw new error("User not found");
+    }
+    const response = await axios.post(`${env.FRONT_URL}/user/login`, {
+      email,
+      password,
+    });
+
+    console.log(response);
+    res.redirect("user/token/refresh");
   } catch (error) {
     console.error("Erro na autenticação:", error);
     res.status(500).send("Erro na autenticação");
