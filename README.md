@@ -133,21 +133,6 @@ const corsOptions = {
 - Rate limiting para prevenir ataques de força bruta
 - Validação de dados de entrada
 
-## Testes
-
-Execute os testes usando:
-
-```bash
-# Testes unitários
-npm run test:unit
-
-# Testes de integração
-npm run test:integration
-
-# Todos os testes
-npm test
-```
-
 ## Contribuição
 
 1. Faça um fork do projeto

@@ -6,6 +6,9 @@ const envSchema = z.object({
   JWT_SECRET: z.coerce.string().default("123"),
   PORT: z.coerce.number().default(3333),
   FRONT_URL: z.coerce.string().default("http://localhost:3000"),
+  GOOGLE_CLIENT_ID: z.coerce.string().default(""),
+  GOOGLE_CLIENT_SECRET: z.coerce.string().default(""),
+  GOOGLE_REDIRECT_URL: z.coerce.string().default(""),
 });
 
 const _env = envSchema.safeParse(process.env);

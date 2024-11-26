@@ -8,3 +8,14 @@ export const authMiddleware = (err, req, res, next) => {
   }
   next(err);
 };
+
+export const checkAuth = (req, res, next) => {
+  if (req.session.user) {
+    next();
+  } else {
+    res.status(401).json({
+      error: "Não autorizado",
+      message: "Faça login para acessar este recurso",
+    });
+  }
+};

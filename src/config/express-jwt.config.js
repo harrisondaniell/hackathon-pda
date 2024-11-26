@@ -12,6 +12,10 @@ export const expressConfigjwt = expressjwt({
     "/user/token/refresh",
     "/hotel/register",
     "/hotel/login",
+    "/company/create",
+    "/auth",
+    "/auth/google",
+    "/auth/google/callback",
 
     { url: /^\/public\/.*/, methods: ["GET"] },
   ],
